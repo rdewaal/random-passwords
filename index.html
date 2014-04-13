@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+		<style type="text/css">
+			body {
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 10pt;
+			}
+			#main {
+				float: left;
+				margin-left: auto;
+				margin-right: auto;
+				margin-top: 20px;
+			}
+			#main div.row {
+				clear: both;
+				height: 30px;
+			}
+			#main div.label {
+				float: left;
+				width: 160px;
+				font-weight: bold;
+			}
+			#main div.data {
+				float: left;
+			}
+			#main div.data input {
+				width: 50px;
+				text-align: center;
+			}
+			#main button.cmd-go {
+				margin-left: 40px;
+			}
+			#pwd-list {
+				float: left;
+				border: 1px solid #CCC;
+				padding: 10px;
+	            -webkit-border-radius: 8px;
+	            -moz-border-radius: 8px;
+	            border-radius: 8px;
+				margin: 20px;
+			}
+			#pwd-list div.pwd-row {
+				/* height: 12px; */
+			}
+			.hide-this {
+				display: none;
+			}
+		</style>
+
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+
+		<script type="text/javascript">
+
+			$(document).ready(function() {
+				$("button.cmd-go").on("click", function() {
+					GeneratePwds();
+				});
+			});
+
+			function GeneratePwds() {
+				var wnLen = parseInt($("#main input[name=PwdLen]").val());
+				var wnNmbr = parseInt($("#main input[name=PwdNmbr]").val());
+				var wnMin = 33;
+				var wnMax = 126;
+				if(wnLen > 0 && wnNmbr > 0) {
+					$("#pwd-list").html("");
+					for(var i = 0; i < wnNmbr; i++) {
+						var wsPwd = "";
+						for(var j = 0; j < wnLen; j++) {
+							wnRand = Math.round(Math.random() * (wnMax - wnMin) + wnMin);
+							var wsChr = "&#"+wnRand+";";
+							wsPwd += wsChr;
+							/*
+							var wnRand = 0;
+							while(wnRand == 0) {
+								wnRand = Math.round(Math.random() * (wnMax - wnMin) + wnMin);
+								if(wnRand == 60 || wnRand == 62) { wnRand = 0; }
+							}
+							var wsChr = String.fromCharCode(wnRand);
+							wsPwd += wsChr;
+							*/
+							/* console.log("wnRand="+wnRand+", wsChr="+wsChr); */
+						}
+						$("#pwd-list").append('<div class="pwd-row"><pre>'+wsPwd+'</pre></div>');
+					}
+					$("#pwd-list").removeClass("hide-this");
+				} else {
+					$("#pwd-list").html("Enter a number greater than 0 in both the Length and Number fields.").removeClass("hide-this");;
+				}
+			}
+
+			function test() {
+				for(var i = 33; i < 127; i++) {
+					var wsChr = String.fromCharCode(i);
+					console.log(i+":"+wsChr);
+				}
+			}
+
+		</script>
+	</head>
+
+	<body>
+
+		<div id="main">
+			<div class="row">
+				<div class="label">Password Length:</div>
+				<div class="data"><input name="PwdLen" type="text"></div>
+			</div>
+			<div class="row">
+				<div class="label">Number of Passwords:</div>
+				<div class="data"><input name="PwdNmbr" type="text"></div>
+			</div>
+			<div class="row"><button class="cmd-go">Generate</button></div>
+		</div>
+
+		<div id="pwd-list" class="hide-this"></div>
+
+	</body>
+
+</html>
