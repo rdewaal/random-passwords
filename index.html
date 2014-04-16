@@ -1,4 +1,4 @@
-<!-- Ramdom-ish password generator.  By Robert J deWaal : rdewaal1@gmail.com : 04/12/2014.  Open source, use as you see fit. -->
+<!-- Ramdom-ish password generator.  By Robert J deWaal : rdewaal1@gmail.com : 04/12/2014.  Free source, use as you see fit. -->
 <!DOCTYPE html>
 
 <html>
@@ -13,7 +13,7 @@
 				float: left;
 				margin: 20px;
 				border: 1px solid #CCC;
-				background-color: #EFEFEF;
+				background-color: #F9F9F9;
 				padding: 10px;
 	            -webkit-border-radius: 8px;
 	            -moz-border-radius: 8px;
@@ -60,7 +60,7 @@
 			#main button.cmd-go {
 				margin-left: 65px;
 			}
-			#pwd-list {
+			#pwd-list, #user-info {
 				float: left;
 				border: 1px solid #CCC;
 				padding: 10px;
@@ -69,8 +69,8 @@
 	            border-radius: 8px;
 				margin: 20px;
 			}
-			#pwd-list div.pwd-row {
-				/* height: 12px; */
+			#user-info {
+				background-color: #F9F9F9;
 			}
 			.hide-this {
 				display: none;
@@ -80,7 +80,6 @@
 			}
 		</style>
 
-		<!--<script src="jquery-1.10.2.min.js"></script>-->
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 
 		<script type="text/javascript">
@@ -89,6 +88,14 @@
 				$("button.cmd-go").on("click", function() {
 					GeneratePwds();
 				});
+				$("input.cmd-chrtype").on("click", function() {
+					var wnGroupID = $(this).attr("groupid");
+					if($(this)[0].checked) {
+						$("div.row2[groupid="+wnGroupID+"]").slideDown(500);
+					} else {
+						$("div.row2[groupid="+wnGroupID+"]").slideUp(500);
+					}
+				})
 			});
 
 			// Generate passwords based on user inputs.
@@ -142,11 +149,12 @@
 
 					if(wnLen >= wnMinLen) {
 
+						$("#user-info").addClass("hide-this");
 						$("#pwd-list").html("").removeClass("alert");
 
 						for(var wnIteration = 0; wnIteration < wnNmbr; wnIteration++) {
 
-							// Get the miniumum number of each type, store in wcaPwd.  Then get the remainder needed of any type.  Then randomize the final result.
+							// Get the miniumum number of each type, store in wcaPwd.
 							var wcaPwd = new Array(wnLen);
 							var wnCntr = 0;
 
@@ -168,7 +176,7 @@
 								}
 							}
 
-							// #@%$!&;:,^~*|'"(){}-/><\?[`].+_=
+							// ~`!@#$%^&*()-_=+[{]}\|;:'",<.>/?
 							if(wbPunc) {
 								var wsOmitList = $("#main input[name=Omit]").val();
 								var wcaOmit = [];
@@ -199,9 +207,41 @@
 								}
 							}
 
-							// Get the balance of the characters needed.
-							for(var i = wnCntr; i < wnLen; i++) {
-								wcaPwd[i] = Math.round(Math.random() * (wnMaxChr - wnMinChr) + wnMinChr);
+							// Get the balance of the characters needed.  If no boxes where checked, all characters are allowed.  Otherwise, only generate the balance needed from the selected sets.
+							if(!wbUcase && !wbLcase && !wbNums && !wbPunc) {
+								for(var i = wnCntr; i < wnLen; i++) {
+									wcaPwd[i] = Math.round(Math.random() * (wnMaxChr - wnMinChr) + wnMinChr);
+								}
+							} else {
+								while(wnCntr < wnLen) {
+									if(wbUcase && wnCntr < wnLen) {
+										wcaPwd[wnCntr++] = Math.round(Math.random() * (wnMaxUcaseChr - wnMinUcaseChr) + wnMinUcaseChr);
+									}
+									if(wbLcase && wnCntr < wnLen) {
+										wcaPwd[wnCntr++] = Math.round(Math.random() * (wnMaxLcaseChr - wnMinLcaseChr) + wnMinLcaseChr);
+									}
+									if(wbNums && wnCntr < wnLen) {
+										wcaPwd[wnCntr++] = Math.round(Math.random() * (wnMaxNumChr - wnMinNumChr) + wnMinNumChr);
+									}
+									if(wbPunc && wnCntr < wnLen) {
+										var wnChr = 0;
+										while(wnChr == 0) {
+											wnChr = Math.round(Math.random() * (wnMaxChr - wnMinChr) + wnMinChr);
+											// Check to make sure the character is not in the omit list.
+											for(var j = 0; j < wcaOmit.length; j++) {
+												if(wnChr == wcaOmit[j]) {
+													wnChr = 0;
+													break;
+												}
+											}
+											// Check to make sure the character is in one of the four ranges for punctuation characters.
+											if(!(((wnChr >= wnMinPuncChrA) && (wnChr <= wnMaxPuncChrA)) || ((wnChr >= wnMinPuncChrB) && (wnChr <= wnMaxPuncChrB)) || ((wnChr >= wnMinPuncChrC) && (wnChr <= wnMaxPuncChrC)) || ((wnChr >= wnMinPuncChrD) && (wnChr <= wnMaxPuncChrD)))) {
+												wnChr = 0;
+											}
+										}
+										wcaPwd[wnCntr++] = wnChr;
+									}
+								}
 							}
 
 							wcaPwd = ShuffleArray(wcaPwd);
@@ -269,37 +309,37 @@
 			</div>
 			<div class="row2 spacer">
 				<div class="label2">Uppercase Characters:</div>
-				<div class="data"><input name="UCase" type="checkbox" value="1" title="Include uppercase characters in the password strings"></div>
+				<div class="data"><input name="UCase" class="cmd-chrtype" groupid="1" type="checkbox" value="1" title="Use uppercase characters in the password strings"></div>
 			</div>
-			<div class="row2">
+			<div class="row2" style="display:none;" groupid="1">
 				<div class="label3">Minimum:</div>
 				<div class="data"><input name="MinUcase" type="text" title="The minimum number of uppercase characters to generate"></div>
 			</div>
 			<div class="row2">
 				<div class="label2">Lowercase Characters:</div>
-				<div class="data"><input name="LCase" type="checkbox" value="1" title="Include lowercase characters in the password strings"></div>
+				<div class="data"><input name="LCase" class="cmd-chrtype" groupid="2" type="checkbox" value="1" title="Use lowercase characters in the password strings"></div>
 			</div>
-			<div class="row2">
+			<div class="row2" style="display:none;" groupid="2">
 				<div class="label3">Minimum:</div>
 				<div class="data"><input name="MinLcase" type="text" title="The minimum number of lowercase characters to generate"></div>
 			</div>
 			<div class="row2">
 				<div class="label2">Numbers:</div>
-				<div class="data"><input name="Nums" type="checkbox" value="1" title="Include numbers in the password strings"></div>
+				<div class="data"><input name="Nums" class="cmd-chrtype" groupid="3" type="checkbox" value="1" title="Use numbers in the password strings"></div>
 			</div>
-			<div class="row2">
+			<div class="row2" style="display:none;" groupid="3">
 				<div class="label3">Minimum:</div>
 				<div class="data"><input name="MinNums" type="text" title="The minimum number of numbers to generate"></div>
 			</div>
 			<div class="row2">
 				<div class="label2">Punctuation:</div>
-				<div class="data"><input name="Punc" type="checkbox" value="1" title="Include punctuation characters in the password strings"></div>
+				<div class="data"><input name="Punc" class="cmd-chrtype" type="checkbox" groupid="4" value="1" title="Use punctuation characters in the password strings"></div>
 			</div>
-			<div class="row2">
+			<div class="row2" style="display:none;" groupid="4">
 				<div class="label3">Minimum:</div>
 				<div class="data"><input name="MinPunc" type="text" title="The minimum number of punctuation characters to generate"></div>
 			</div>
-			<div class="row2">
+			<div class="row2" style="display:none;" groupid="4">
 				<div class="label3">Omit:</div>
 				<div class="data"><input name="Omit" type="text" maxlength="31" title="Enter an optional list of punctuation characters to omit from the password strings. Enter one or more without spaces between them."></div>
 			</div>
@@ -307,6 +347,23 @@
 		</div>
 
 		<div id="pwd-list" class="hide-this"></div>
+
+		<div id="user-info">
+			Use this tool to generate any number of random passwords of any length.<br><br>
+
+			If you only fill in the <strong>Password Length</strong> and <strong>Number of Passwords</strong> fields, you will get<br>
+			a random mix of uppercase characters, lowercase characters, numbers, and punctuation characters.<br><br>
+
+			If you check one or more of the four checkboxes, you will get only characters within that category.<br>
+			You can force a miniumum number of characters within any category by putting a number in the <strong>Minimum</strong> field.<br>
+			Checking all four boxes and leaving all of the Minimums blank is not the same thing as checking none of the boxes.<br>
+			If you do that, you will get an equal distribution of each character (provided the Password Length is evenly divisble<br>
+			by four).<br><br>
+
+			In the Punctuation section, you can also optionally omit one or more punctuation characters by typing them<br>
+			into the <strong>Omit</strong> field. This is handy when a site warns you that the password may not contain certain<br>
+			characters. Type them in without any spaces between them.
+		</div>
 
 	</body>
 
